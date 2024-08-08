@@ -2,10 +2,26 @@ import mongoose from 'mongoose';
 import createError from 'http-errors';
 import { getAllContacts, getContactById, patchContact, addContact, deleteContact } from '../services/contacts.js'
 import createHttpError from 'http-errors';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { contactFieldList } from '../constants/index.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
+import { parseFilterParams } from '../utils/parseFilterParams.js';
 
 export const getAllContactsController = async (req, res) => {
+    const { query } = req;
+    const { page, perPage } = parsePaginationParams(query);
+    const { sortBy, sortOrder } = parseSortParams(query, contactFieldList)
+    const filter = parseFilterParams(query)
+
     try {
-        const contacts = await getAllContacts();
+
+        const contacts = await getAllContacts({
+            page,
+            perPage,
+            sortBy,
+            sortOrder,
+            filter,
+        });
         res.status(200).send({
             status: 200,
             message: 'Successfully found contacts!',
@@ -87,16 +103,16 @@ export const patchContactController = async (req, res) => {
 
 
 export const deleteContactController = async (req, res, next) => {
-    const { contactId } = req.params; // Параметри в правильному порядку
+    const { contactId } = req.params;
     try {
         const contact = await deleteContact(contactId);
         if (!contact) {
             return next(createHttpError(404, 'Contact not found'));
         }
-        res.status(204).send(); // Відправка відповіді з кодом 204 (No Content)
+        res.status(204).send();
     } catch (error) {
         console.error("Error in deleteContactController:", error);
-        next(createHttpError(500, 'Internal Server Error')); // Обробка помилок
+        next(createHttpError(500, 'Internal Server Error'));
     }
 }
 
