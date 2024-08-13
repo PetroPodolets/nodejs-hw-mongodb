@@ -21,12 +21,16 @@ const contactSchema = new Schema({
         enum: ["work", "home", "personal"],
         required: true,
         default: "personal"
+    },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
+        required: true,
     }
-},
-    {
-        timestamps: true,
-        versionKey: false,
-    }
-)
+}, {
+    timestamps: true,
+    versionKey: false,
+});
+
 
 export const contactColection = model('contacts', contactSchema);
