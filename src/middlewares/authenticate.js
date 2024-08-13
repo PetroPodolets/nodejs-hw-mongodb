@@ -5,7 +5,7 @@ import { findUser } from "../services/auth.js";
 const authenticate = async (req, res, next) => {
     const authHeader = req.get("Authorization");
     if (!authHeader) {
-        console.log("auth", authHeader);
+
 
         return next(createHttpError(401, "Authorization header missing"));
     }
