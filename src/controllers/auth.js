@@ -75,6 +75,7 @@ export const loginController = async (req, res, next) => {
         next(error);
     }
 };
+
 export const refreshController = async (req, res, next) => {
     try {
         const { refreshToken, sessionId } = req.cookies;
@@ -93,8 +94,13 @@ export const refreshController = async (req, res, next) => {
             return next(createHttpError(401, "Session expired"));
         }
 
+        // Видаляємо існуючу сесію
+        await deleteSession(sessionId);
+
+        // Створюємо нову сесію
         const newSession = await createSession(currentSession.userId);
 
+        // Налаштовуємо відповідь з новою сесією
         setupResponseSession(res, newSession);
 
         res.status(200).json({
@@ -105,7 +111,7 @@ export const refreshController = async (req, res, next) => {
             }
         });
     } catch (error) {
-        next(error);
+        next(error); // Обробка помилок через middleware
     }
 };
 

@@ -10,5 +10,5 @@ export const register = async (data) => {
     return User.create({ ...data, password: hashPassword });
 }
 
+export const deleteSession = sessionId => Session.deleteOne({ _id: sessionId });
 
-export const deleteSession = filter => Session.deleteOne(filter);
