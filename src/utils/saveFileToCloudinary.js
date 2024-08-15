@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
-import { v2 as cloudinary } from "cloudinary";
+import cloudinary from "cloudinary";
 import { env } from "./env.js";
 import { CLOUDINARY } from '../constants/index.js';
 
-cloudinary.config({
+cloudinary.v2.config({
     secure: true,
     cloud_name: env(CLOUDINARY.CLOUD_NAME),
     api_key: env(CLOUDINARY.API_KEY),
