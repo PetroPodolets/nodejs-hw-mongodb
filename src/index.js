@@ -1,15 +1,14 @@
-
 import { setupServer } from './server.js';
+import { createDirIfNotExists } from './utils/createDirIfNotExists.js';
+import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from './constants/index.js';
 import { initMongoDB } from './db/initMongoConnection.js';
 
 const bootstrap = async () => {
-    try {
-        await initMongoDB();
-        console.log('Application has started successfully.');
-        setupServer()
-    } catch (e) {
-        console.error('Failed to start application', e);
-    }
+    await initMongoDB();
+    await createDirIfNotExists(TEMP_UPLOAD_DIR);
+    await createDirIfNotExists(UPLOAD_DIR);
+    setupServer();
 };
 
-bootstrap();
+void bootstrap();
+

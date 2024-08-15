@@ -1,5 +1,5 @@
 import createHttpError from "http-errors";
-import { deleteSession, findUser, register } from "../services/auth.js";
+import { deleteSession, findUser, register, requestResetToken, resetPassword } from "../services/auth.js";
 import { hashCompare } from "../utils/hash.js";
 import { createSession, findSession } from "../services/sesion.js";
 
@@ -94,13 +94,10 @@ export const refreshController = async (req, res, next) => {
             return next(createHttpError(401, "Session expired"));
         }
 
-        // Видаляємо існуючу сесію
         await deleteSession(sessionId);
 
-        // Створюємо нову сесію
         const newSession = await createSession(currentSession.userId);
 
-        // Налаштовуємо відповідь з новою сесією
         setupResponseSession(res, newSession);
 
         res.status(200).json({
@@ -111,7 +108,7 @@ export const refreshController = async (req, res, next) => {
             }
         });
     } catch (error) {
-        next(error); // Обробка помилок через middleware
+        next(error);
     }
 };
 
@@ -129,3 +126,45 @@ export const logoutController = async (req, res) => {
 
     res.status(204).send();
 }
+
+
+export const requestResetEmailController = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return next(createHttpError(400, 'Email is required'));
+        }
+
+        await requestResetToken(email);
+
+        res.status(200).json({
+            status: 200,
+            message: 'Reset password email has been successfully sent.',
+            data: {},
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+export const resetPasswordController = async (req, res, next) => {
+    try {
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return next(createHttpError(400, "Token and new password are required"));
+        }
+
+        await resetPassword({ token, password });
+
+        res.status(200).json({
+            status: 200,
+            message: 'Password has been successfully reset.',
+            data: {},
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+

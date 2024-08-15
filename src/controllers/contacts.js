@@ -4,7 +4,13 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { contactFieldList } from '../constants/index.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { env } from '../utils/env.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
+
+
+const enable_cloudinary = env("ENABLE_CLOUDINARY");
 export const getAllContactsController = async (req, res, next) => {
     try {
         const { page, perPage } = parsePaginationParams(req.query);
@@ -73,6 +79,18 @@ export const addContactController = async (req, res) => {
 export const patchContactController = async (req, res) => {
     const { _id: userId } = req.user;
     const { contactId } = req.params;
+    let photo;
+
+    if (req.file) {
+        if (enable_cloudinary === "true") {
+            photo = await saveFileToCloudinary(req.file, "photos");
+        } else {
+            photo = await saveFileToUploadDir(req.file, "photos");
+        }
+        if (photo) {
+            req.body.photo = photo;
+        }
+    }
 
     try {
         const result = await patchContact(contactId, userId, req.body);
