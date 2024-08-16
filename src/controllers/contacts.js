@@ -6,8 +6,7 @@ import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { env } from '../utils/env.js';
-import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
-
+import saveFileToCloudinary from "../utils/saveFileToCloudinary.js"
 
 
 const enable_cloudinary = env("ENABLE_CLOUDINARY");
@@ -56,25 +55,30 @@ export const getContactByIdController = async (req, res, next) => {
     }
 };
 
-
 export const addContactController = async (req, res) => {
     const { _id: userId } = req.user;
 
-    try {
-        const contact = await addContact({ ...req.body, userId });
-        res.status(201).json({
-            status: 201,
-            message: 'Successfully created a contact!',
-            data: contact,
-        });
-    } catch (error) {
-        console.error('Error creating contact:', error);
-        res.status(500).json({
-            status: 500,
-            message: 'Internal Server Error',
-        });
+    let photo = ""
+
+    if (req.file) {
+        if (enable_cloudinary === "true") {
+            photo = await saveFileToCloudinary(req.file, "photos");
+        }
+        else {
+            photo = await saveFileToUploadDir(req.file, "photos");
+        }
     }
-};
+
+    const data = await addContact({ ...req.body, userId, photo });
+
+    res.status(201).json({
+        status: 201,
+        message: "Successfully created a contact!",
+        data
+    })
+
+}
+
 
 export const patchContactController = async (req, res) => {
     const { _id: userId } = req.user;
@@ -83,6 +87,7 @@ export const patchContactController = async (req, res) => {
 
     if (req.file) {
         if (enable_cloudinary === "true") {
+
             photo = await saveFileToCloudinary(req.file, "photos");
         } else {
             photo = await saveFileToUploadDir(req.file, "photos");

@@ -58,7 +58,6 @@ export const getContactById = async (contactId, userId) => {
     }
 };
 
-
 export const addContact = async (contact) => {
     const { userId, ...contactData } = contact;
     return contactColection.create({ ...contactData, userId });
